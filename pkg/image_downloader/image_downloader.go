@@ -15,20 +15,32 @@ type ImageDownloader struct {
 	Prefix_image         string
 }
 
-func getFilename(image_url, prefix string) string {
+func getFilename(image_url, prefix string) (string, error) {
 	v := strings.Split(image_url, "/")
-	return prefix + v[len(v)-1]
+	s_length := len(v)
+
+	if s_length <= 1 {
+		return "", fmt.Errorf("filename was not found on image url %s", image_url)
+	}
+
+	return prefix + v[s_length-1], nil
 }
 
 func Download(id *ImageDownloader, image_url string) {
 	response, e := http.Get(image_url)
+
 	if e != nil {
 		log.Fatalf("%v", e)
 	}
 
 	defer response.Body.Close()
 
-	filename := getFilename(image_url, id.Prefix_image)
+	filename, err := getFilename(image_url, id.Prefix_image)
+
+	if err != nil {
+		log.Fatalf("Error on getting filename, error: %v", err)
+	}
+
 	file, err := os.Create(id.Download_folder_path + "/" + filename)
 
 	if err != nil {
