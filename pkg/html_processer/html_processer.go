@@ -1,26 +1,19 @@
 package htmlprocesser
 
 import (
-	"errors"
 	"fmt"
 	"log"
 
 	"github.com/anaskhan96/soup"
 )
 
-type HTMLContent struct {
-	url     string
-	content string
-	err     error
-}
-
 type ImageUrls []string
 
-func getHTML(url string) (soup.Root, error) {
+func getHTMLParsed(url string) (soup.Root, error) {
 	resp, err := soup.Get(url)
 
 	if err != nil {
-		return soup.Root{}, errors.New(fmt.Sprintf("There was an error resolving the url %v", err))
+		return soup.Root{}, fmt.Errorf("there was an error resolving the url %v", err)
 	}
 
 	doc := soup.HTMLParse(resp)
@@ -31,7 +24,7 @@ func getDivByClass(class_name string, doc soup.Root) (soup.Root, error) {
 	div_class := doc.Find("div", "class", class_name)
 
 	if div_class.Error != nil {
-		return soup.Root{}, errors.New(fmt.Sprintf("Class provided (%s) does not exist, error: %v", class_name, div_class.Error))
+		return soup.Root{}, fmt.Errorf("class provided (%s) does not exist, error: %v", class_name, div_class.Error)
 	}
 
 	return div_class, nil
@@ -52,7 +45,7 @@ func getImageLinksFrom(container soup.Root) ImageUrls {
 }
 
 func ExecByClass(url, class_name string) ImageUrls {
-	html_content, err := getHTML(url)
+	html_content, err := getHTMLParsed(url)
 
 	if err != nil {
 		log.Fatalf("Error: %v", err)

@@ -12,10 +12,10 @@ type StorageMockError struct{}
 
 func TestGetFilename_is_correct(t *testing.T) {
 	got, err := getFilename("http://something.com/images/some-image.jpg", "thumbnail_")
-	want := "thumbnail_some-image.jpg"
+	expected := "thumbnail_some-image.jpg"
 
-	if err != nil || got != want {
-		t.Errorf("Error: It was expected %s got %s", want, got)
+	if err != nil || got != expected {
+		t.Errorf("Error: It was expected %s got %s", expected, got)
 	}
 }
 
