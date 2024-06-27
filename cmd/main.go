@@ -9,87 +9,79 @@ import (
 	imagedownloader "github.com/hreluz/images-scrapper/pkg/image_downloader"
 )
 
-func getUrl() string {
-	url, err := interaction.GetUserInput("Insert url")
+func getPagination() (int, string) {
+	resp := interaction.GetUserInputWithErrorHandling("Does this URL have pagination (Y/N)?")
 
-	if err != nil {
-		log.Fatalf("There was an error when getting the url, error: %s", err)
+	if resp != "Y" {
+		return 0, ""
 	}
 
-	return url
+	v := interaction.GetUserInputWithErrorHandling("How many URLs would you like to check?")
+
+	number, err := strconv.Atoi(v)
+
+	if err != nil {
+		log.Fatalf("Invalid number for pagination, error: %s", err)
+	}
+
+	className := interaction.GetUserInputWithErrorHandling("Enter the classname for the pagination")
+
+	return number, className
 }
 
-func getClassNames() string {
-	class_name, err := interaction.GetUserInput("Insert class name where to pull all the images")
+func processImages(url string, className string, pNumber int, pClassName string) htmlprocesser.ImageUrls {
+	var imageUrls htmlprocesser.ImageUrls
 
-	if err != nil {
-		log.Fatalf("There was an error when getting the classnames, error: %s", err)
-	}
+	for i := 0; i < pNumber; i++ {
 
-	return class_name
-}
-
-func getPagination() (number int, class_name string) {
-	resp, err := interaction.GetUserInput("Does this url have pagination (Y/N)?")
-
-	if err != nil {
-		log.Fatalf("There was an error when getting the pagination, error: %s", err)
-	}
-
-	if resp == "Y" {
-		v, _ := interaction.GetUserInput("How many urls would you like to check?")
-
-		if _, err := strconv.Atoi(v); err == nil {
-			number, _ = strconv.Atoi(v)
-		}
-
-		class_name, err = interaction.GetUserInput("Enter the classname for the pagination")
+		htmlParsed, err := htmlprocesser.GetHTMLParsed(url)
 
 		if err != nil {
-			log.Fatalf("There was an error when getting the clasname for the pagination, error: %s", err)
+			log.Printf("Error parsing HTML: %s", err)
+			continue
 		}
+
+		divClass, err := htmlprocesser.GetDivByClass(className, htmlParsed)
+
+		if err != nil {
+			log.Printf("Error parsing div: %s", err)
+			continue
+		}
+
+		imageUrls = append(imageUrls, htmlprocesser.GetImageLinksFrom(divClass)...)
+
+		url = htmlprocesser.GetPaginationNextLink(htmlParsed, pClassName)
 	}
 
-	return number, class_name
+	return imageUrls
 }
 
 func main() {
 
-	var image_urls htmlprocesser.ImageUrls
+	imgChannel := make(chan bool)
 
-	img_channel := make(chan bool)
+	imagesToProcess := 0
 
-	images_to_process := 0
+	className := interaction.GetUserInputWithErrorHandling("Insert class name where to pull all the images")
 
-	class_name := getClassNames()
+	url := interaction.GetUserInputWithErrorHandling("Insert URL")
 
-	url := getUrl()
+	pNumber, pClassName := getPagination()
 
-	p_number, p_class_name := getPagination()
+	imageUrls := processImages(url, className, pNumber, pClassName)
 
 	id := &imagedownloader.ImageDownloader{
 		Download_folder_path: "../downloaded_images",
-		Img_channel:          img_channel,
+		Img_channel:          imgChannel,
 		Prefix_image:         "image_",
 	}
 
-	for i := 0; i < p_number; i++ {
-
-		html_parsed, _ := htmlprocesser.GetHTMLParsed(url)
-
-		div_class, _ := htmlprocesser.GetDivByClass(class_name, html_parsed)
-
-		image_urls = append(image_urls, htmlprocesser.GetImageLinksFrom(div_class)...)
-
-		url = htmlprocesser.GetPaginationNextLink(html_parsed, p_class_name)
-	}
-
-	for _, image_url := range image_urls {
-		images_to_process++
+	for _, image_url := range imageUrls {
+		imagesToProcess++
 		go imagedownloader.Download(id, image_url)
 	}
 
-	for i := 0; i < images_to_process; i++ {
-		<-img_channel
+	for i := 0; i < imagesToProcess; i++ {
+		<-imgChannel
 	}
 }
