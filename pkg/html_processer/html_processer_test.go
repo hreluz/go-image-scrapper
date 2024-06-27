@@ -27,7 +27,7 @@ func TestGetHTML(t *testing.T) {
 	defer mockServer.Close()
 
 	url := mockServer.URL
-	html, err := getHTMLParsed(url)
+	html, err := GetHTMLParsed(url)
 
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
@@ -42,7 +42,7 @@ func TestGetHTML(t *testing.T) {
 }
 
 func TestGetHTML_cannot_load(t *testing.T) {
-	_, err := getHTMLParsed("http://localhost")
+	_, err := GetHTMLParsed("http://localhost")
 
 	if err == nil {
 		t.Fatalf("an error happened, it resolved url when it shouldn't")

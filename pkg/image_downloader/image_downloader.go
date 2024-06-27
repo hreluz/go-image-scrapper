@@ -54,6 +54,6 @@ func Download(id *ImageDownloader, image_url string) {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("The image %v was downloaded successfully!", filename)
+	fmt.Printf("The image %v was downloaded successfully!\n", filename)
 	id.Img_channel <- true
 }
