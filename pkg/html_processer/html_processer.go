@@ -2,7 +2,6 @@ package htmlprocesser
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/anaskhan96/soup"
 )
@@ -20,11 +19,11 @@ func GetHTMLParsed(url string) (soup.Root, error) {
 	return doc, nil
 }
 
-func GetDivByClass(class_name string, doc soup.Root) (soup.Root, error) {
-	div_class := doc.Find("div", "class", class_name)
+func GetDivBySelector(selector string, selectorName string, doc soup.Root) (soup.Root, error) {
+	div_class := doc.Find("div", selector, selectorName)
 
 	if div_class.Error != nil {
-		return soup.Root{}, fmt.Errorf("class provided (%s) does not exist, error: %v", class_name, div_class.Error)
+		return soup.Root{}, fmt.Errorf("%s provided (%s) does not exist, error: %v", selector, selectorName, div_class.Error)
 	}
 
 	return div_class, nil
@@ -44,22 +43,18 @@ func GetImageLinksFrom(container soup.Root) ImageUrls {
 	return image_links
 }
 
-func GetPaginationNextLink(container soup.Root, class_name string) string {
-	return container.Find("span", "class", class_name).Find("a").Attrs()["href"]
-}
+func GetPaginationNextLink(container soup.Root, className string) (string, error) {
+	span := container.Find("span", "class", className)
 
-func ExecByClass(url, class_name string) ImageUrls {
-	html_content, err := GetHTMLParsed(url)
-
-	if err != nil {
-		log.Fatalf("Error: %v", err)
+	if span.Error != nil {
+		return "", fmt.Errorf("span with class %s was not found in html", className)
 	}
 
-	div_class, err := GetDivByClass(class_name, html_content)
+	a := span.Find("a")
 
-	if err != nil {
-		log.Fatalf("Error: %v", err)
+	if a.Error != nil {
+		return "", fmt.Errorf("element a was not found in span")
 	}
 
-	return GetImageLinksFrom(div_class)
+	return a.Attrs()["href"], nil
 }
