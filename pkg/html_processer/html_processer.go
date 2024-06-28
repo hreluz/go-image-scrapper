@@ -1,43 +1,35 @@
 package htmlprocesser
 
 import (
-	"errors"
 	"fmt"
-	"log"
 
 	"github.com/anaskhan96/soup"
 )
 
-type HTMLContent struct {
-	url     string
-	content string
-	err     error
-}
-
 type ImageUrls []string
 
-func getHTML(url string) (soup.Root, error) {
+func GetHTMLParsed(url string) (soup.Root, error) {
 	resp, err := soup.Get(url)
 
 	if err != nil {
-		return soup.Root{}, errors.New(fmt.Sprintf("There was an error resolving the url %v", err))
+		return soup.Root{}, fmt.Errorf("there was an error resolving the url %v", err)
 	}
 
 	doc := soup.HTMLParse(resp)
 	return doc, nil
 }
 
-func getDivByClass(class_name string, doc soup.Root) (soup.Root, error) {
-	div_class := doc.Find("div", "class", class_name)
+func GetDivBySelector(selector string, selectorName string, doc soup.Root) (soup.Root, error) {
+	div_class := doc.Find("div", selector, selectorName)
 
 	if div_class.Error != nil {
-		return soup.Root{}, errors.New(fmt.Sprintf("Class provided (%s) does not exist, error: %v", class_name, div_class.Error))
+		return soup.Root{}, fmt.Errorf("%s provided (%s) does not exist, error: %v", selector, selectorName, div_class.Error)
 	}
 
 	return div_class, nil
 }
 
-func getImageLinksFrom(container soup.Root) ImageUrls {
+func GetImageLinksFrom(container soup.Root) ImageUrls {
 	var image_links ImageUrls
 
 	images_tags := container.FindAll("img")
@@ -51,18 +43,18 @@ func getImageLinksFrom(container soup.Root) ImageUrls {
 	return image_links
 }
 
-func ExecByClass(url, class_name string) ImageUrls {
-	html_content, err := getHTML(url)
+func GetPaginationNextLink(container soup.Root, className string) (string, error) {
+	span := container.Find("span", "class", className)
 
-	if err != nil {
-		log.Fatalf("Error: %v", err)
+	if span.Error != nil {
+		return "", fmt.Errorf("span with class %s was not found in html", className)
 	}
 
-	div_class, err := getDivByClass(class_name, html_content)
+	a := span.Find("a")
 
-	if err != nil {
-		log.Fatalf("Error: %v", err)
+	if a.Error != nil {
+		return "", fmt.Errorf("element a was not found in span")
 	}
 
-	return getImageLinksFrom(div_class)
+	return a.Attrs()["href"], nil
 }
