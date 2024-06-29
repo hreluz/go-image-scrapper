@@ -8,7 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	htmlprocesser "github.com/hreluz/images-scrapper/pkg/html_processer"
+	"github.com/hreluz/images-scrapper/pkg/html_processer/selector"
+	"github.com/hreluz/images-scrapper/pkg/html_processer/tag"
 )
 
 var reader = bufio.NewReader(os.Stdin)
@@ -36,9 +37,9 @@ func GetUserInputWithErrorHandling(prompt string) string {
 	return input
 }
 
-func GetTagChoice() htmlprocesser.TagName {
+func GetTagChoice() tag.TagName {
 
-	optionsLength := len(htmlprocesser.TAGS_OPTIONS)
+	optionsLength := len(tag.TAGS_OPTIONS)
 	option := 1
 
 	for {
@@ -52,12 +53,12 @@ func GetTagChoice() htmlprocesser.TagName {
 		break
 	}
 
-	return htmlprocesser.TAGS_OPTIONS[option-1]
+	return tag.TAGS_OPTIONS[option-1]
 }
 
-func GetSelectorTypeChoice() htmlprocesser.SelectorType {
+func GetSelectorTypeChoice() selector.SelectorType {
 
-	optionsLength := len(htmlprocesser.SELECTOR_TYPE_OPTIONS)
+	optionsLength := len(selector.SELECTOR_TYPE_OPTIONS)
 	option := 1
 
 	for {
@@ -71,5 +72,5 @@ func GetSelectorTypeChoice() htmlprocesser.SelectorType {
 		break
 	}
 
-	return htmlprocesser.SELECTOR_TYPE_OPTIONS[option-1]
+	return selector.SELECTOR_TYPE_OPTIONS[option-1]
 }

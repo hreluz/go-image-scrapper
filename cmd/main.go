@@ -7,49 +7,42 @@ import (
 
 	"github.com/hreluz/images-scrapper/internal/interaction"
 	htmlprocesser "github.com/hreluz/images-scrapper/pkg/html_processer"
+	pagination "github.com/hreluz/images-scrapper/pkg/html_processer/pagination"
+	selector "github.com/hreluz/images-scrapper/pkg/html_processer/selector"
+	tag "github.com/hreluz/images-scrapper/pkg/html_processer/tag"
 	imagedownloader "github.com/hreluz/images-scrapper/pkg/image_downloader"
 )
 
-func getPagination() *htmlprocesser.Pagination {
-	pagination := &htmlprocesser.Pagination{
-		Tag: htmlprocesser.Tag{
-			Selector: htmlprocesser.Selector{
-				Type: "",
-				Name: "",
-			},
-			Name: "",
-		},
-		Number: 1,
-	}
-
+func getPagination() *pagination.Pagination {
 	resp := interaction.GetUserInputWithErrorHandling("Does this URL have pagination (Y/N)?")
 
-	if resp != "Y" {
-		return pagination
+	if resp == "Y" {
+		v := interaction.GetUserInputWithErrorHandling("How many URLs would you like to check?")
+
+		number, err := strconv.Atoi(v)
+
+		if err != nil {
+			log.Fatalf("Invalid number for pagination, error: %s", err)
+		}
+
+		t := *getTagData(
+			"where to extract the pagination (it should be the parent of pagination)",
+			"Insert selector name where to get the pagination link",
+		)
+
+		return pagination.New(
+			&t,
+			number,
+		)
 	}
 
-	v := interaction.GetUserInputWithErrorHandling("How many URLs would you like to check?")
-
-	number, err := strconv.Atoi(v)
-
-	if err != nil {
-		log.Fatalf("Invalid number for pagination, error: %s", err)
-	}
-
-	pagination.Tag = *getTagData(
-		"where to extract the pagination (it should be the parent of pagination)",
-		"Insert selector name where to get the pagination link",
-	)
-
-	pagination.Number = number
-
-	return pagination
+	return nil
 }
 
-func processImages(url string, t *htmlprocesser.Tag, pagination *htmlprocesser.Pagination) htmlprocesser.ImageUrls {
+func processImages(url string, t *tag.Tag, p *pagination.Pagination) htmlprocesser.ImageUrls {
 	var imageUrls htmlprocesser.ImageUrls
 
-	for i := 0; i < pagination.Number; i++ {
+	for i := 0; i < p.GetNumber(); i++ {
 
 		htmlParsed, err := htmlprocesser.GetHTMLParsed(url)
 
@@ -58,7 +51,7 @@ func processImages(url string, t *htmlprocesser.Tag, pagination *htmlprocesser.P
 			continue
 		}
 
-		divClass, err := htmlprocesser.GetDivBySelector(string(t.Selector.Type), string(t.Selector.Name), htmlParsed)
+		divClass, err := htmlprocesser.GetBySelector(t, htmlParsed)
 
 		if err != nil {
 			log.Printf("Error parsing div: %s", err)
@@ -67,8 +60,8 @@ func processImages(url string, t *htmlprocesser.Tag, pagination *htmlprocesser.P
 
 		imageUrls = append(imageUrls, htmlprocesser.GetImageLinksFrom(divClass)...)
 
-		if pagination.Number > 1 {
-			url, err = htmlprocesser.GetPaginationNextLink(htmlParsed, string(pagination.Tag.Selector.Name))
+		if p.GetNumber() > 1 {
+			url, err = htmlprocesser.GetPaginationNextLink(htmlParsed, p)
 			if err != nil {
 				log.Fatalf("there was en error when trying to get the next link in the pagination, error was %s", err.Error())
 			}
@@ -78,40 +71,33 @@ func processImages(url string, t *htmlprocesser.Tag, pagination *htmlprocesser.P
 	return imageUrls
 }
 
-func getTagData(tagOptionText string, selectorTypeText string) *htmlprocesser.Tag {
-	tag := &htmlprocesser.Tag{
-		Selector: htmlprocesser.Selector{
-			Type: "",
-			Name: "",
-		},
-		Name: "",
-	}
+func getTagData(tagOptionText string, selectorTypeText string) *tag.Tag {
 
 	interaction.ShowTagOptions(tagOptionText)
 
-	tag.Name = interaction.GetTagChoice()
+	tagName := interaction.GetTagChoice()
 
-	interaction.ShowSelectorOptions(fmt.Sprintf("for the %s", string(tag.Name)))
+	interaction.ShowSelectorOptions(fmt.Sprintf("for the %s", tagName))
 
-	tag.Selector.Type = interaction.GetSelectorTypeChoice()
-
-	selectorName := interaction.GetUserInputWithErrorHandling(selectorTypeText)
-
-	tag.Selector.Name = htmlprocesser.SelectorName(selectorName)
-
-	return tag
+	return tag.New(
+		selector.New(
+			interaction.GetSelectorTypeChoice(),
+			interaction.GetUserInputWithErrorHandling(selectorTypeText),
+		),
+		tagName,
+	)
 }
 
 func main() {
+
+	imgChannel := make(chan bool)
+
+	imagesToProcess := 0
 
 	tagToExtractImage := getTagData(
 		"where to extract the img (it should be the parent of <img>)",
 		"Insert selector name where to pull all the images",
 	)
-
-	imgChannel := make(chan bool)
-
-	imagesToProcess := 0
 
 	url := interaction.GetUserInputWithErrorHandling("Insert URL")
 
