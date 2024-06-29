@@ -6,7 +6,49 @@ import (
 	"github.com/anaskhan96/soup"
 )
 
+type TagName string
+type TagNames []TagName
+
+const (
+	DIV     TagName = "div"
+	ARTICLE TagName = "article"
+	SPAN    TagName = "span"
+)
+
+var TAGS_OPTIONS = TagNames{DIV, ARTICLE, SPAN}
+
+type SelectorName string
+type SelectorType string
+type SelectorTypes []SelectorType
+
+const (
+	ID    SelectorType = "id"
+	CLASS SelectorType = "class"
+)
+
+var SELECTOR_TYPE_OPTIONS = SelectorTypes{ID, CLASS}
+
 type ImageUrls []string
+
+type Processer struct {
+	url       string
+	imageUrls ImageUrls
+}
+
+type Selector struct {
+	Type SelectorType
+	Name SelectorName
+}
+
+type Tag struct {
+	Selector Selector
+	Name     TagName
+}
+
+type Pagination struct {
+	Tag    Tag
+	Number int
+}
 
 func GetHTMLParsed(url string) (soup.Root, error) {
 	resp, err := soup.Get(url)
