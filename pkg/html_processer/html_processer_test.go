@@ -10,6 +10,9 @@ import (
 	"testing"
 
 	"github.com/anaskhan96/soup"
+	"github.com/hreluz/images-scrapper/pkg/html_processer/pagination"
+	"github.com/hreluz/images-scrapper/pkg/html_processer/selector"
+	"github.com/hreluz/images-scrapper/pkg/html_processer/tag"
 )
 
 func getHTMlContent(htmlName string) []byte {
@@ -58,25 +61,38 @@ func TestGetHTML_cannot_load(t *testing.T) {
 	}
 }
 
-func TestGetDivBySelector(t *testing.T) {
+func TestGetBySelector(t *testing.T) {
 	htmlContent := getHTMlContent("id_container")
 	htmlParsed := soup.HTMLParse(string(htmlContent))
-	div, _ := GetDivBySelector("id", "container-image", htmlParsed)
-	got := string(div.HTML())
+	s := selector.New(
+		selector.ID,
+		"container-image",
+	)
 
+	tag := tag.New(s, tag.DIV)
+
+	selector, _ := GetBySelector(tag, htmlParsed)
+	got := string(selector.HTML())
 	expected := `<div id="container-image">
         <p>hello</p>
     </div>`
 
 	if got != expected {
-		t.Fatalf("div did not match, it was expected %s, and got %s", expected, got)
+		t.Fatalf("div did not match, it was expected\n %s, and got\n %s", expected, got)
 	}
 }
 
-func TestGetDivBySelector_was_not_found(t *testing.T) {
+func TestGetBySelector_was_not_found(t *testing.T) {
 	htmlContent := getHTMlContent("no_content")
 	htmlParsed := soup.HTMLParse(string(htmlContent))
-	_, err := GetDivBySelector("id", "container-image", htmlParsed)
+	s := selector.New(
+		selector.ID,
+		"container-image",
+	)
+
+	tag := tag.New(s, tag.DIV)
+
+	_, err := GetBySelector(tag, htmlParsed)
 
 	if err == nil {
 		t.Fatalf("div was found when it shouldn't")
@@ -109,7 +125,11 @@ func TestGetPaginationNextLink(t *testing.T) {
 	htmlContent := getHTMlContent("pagination")
 	htmlParsed := soup.HTMLParse(string(htmlContent))
 	expected := "http://something-else.com/10"
-	got, err := GetPaginationNextLink(htmlParsed, "previous")
+
+	s := selector.New(selector.CLASS, "previous")
+	tag := tag.New(s, tag.SPAN)
+	p := pagination.New(tag, 1)
+	got, err := GetPaginationNextLink(htmlParsed, p)
 
 	if err != nil {
 		log.Fatalf("there was an error on the pagination, error: %s", err)
@@ -123,7 +143,10 @@ func TestGetPaginationNextLink(t *testing.T) {
 func TestGetPaginationNextLink_was_not_found(t *testing.T) {
 	htmlContent := getHTMlContent("no_content")
 	htmlParsed := soup.HTMLParse(string(htmlContent))
-	_, err := GetPaginationNextLink(htmlParsed, "previous")
+	s := selector.New(selector.CLASS, "previous")
+	tag := tag.New(s, tag.SPAN)
+	p := pagination.New(tag, 1)
+	_, err := GetPaginationNextLink(htmlParsed, p)
 	expected := "span with class previous was not found in html"
 
 	if err.Error() != expected {
