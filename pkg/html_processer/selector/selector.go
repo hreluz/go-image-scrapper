@@ -7,9 +7,10 @@ type SelectorTypes []SelectorType
 const (
 	ID    SelectorType = "id"
 	CLASS SelectorType = "class"
+	NONE  SelectorType = "none"
 )
 
-var SELECTOR_TYPE_OPTIONS = SelectorTypes{ID, CLASS}
+var SELECTOR_TYPE_OPTIONS = SelectorTypes{ID, CLASS, NONE}
 
 type Selector struct {
 	stype SelectorType
@@ -21,6 +22,13 @@ func New(stype SelectorType, name string) *Selector {
 	return &Selector{
 		stype: stype,
 		name:  SelectorName(name),
+	}
+}
+
+func Empty() *Selector {
+	return &Selector{
+		stype: NONE,
+		name:  SelectorName(""),
 	}
 }
 
