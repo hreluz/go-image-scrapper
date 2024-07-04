@@ -8,36 +8,40 @@ import (
 
 func main() {
 
-	var imageUrls image.ImageUrls
-
-	url := interaction.GetUserInputWithErrorHandling("Insert URL")
-
-	paginationConfig := interaction.GetPagination()
-
-	imageConfig := interaction.GetTagConfig("Insert how many levels the img will have: ")
-
-	iprocessor := image.NewProcessor(imageConfig, paginationConfig)
-
+	imageUrlsChannel := make(chan string)
+	webUrlsChannel := make(chan string)
 	imgChannel := make(chan bool)
 
+	// Get user input and configuration
+	webUrl := interaction.GetUserInputWithErrorHandling("Insert URL")
+	paginationConfig := interaction.GetPagination()
+	imageConfig := interaction.GetTagConfig("Insert how many levels the img will have")
+
+	// Initialize the image processor and downloader
+	iprocessor := image.NewProcessor(imageConfig, paginationConfig)
 	id := &imagedownloader.ImageDownloader{
 		Download_folder_path: "../downloaded_images",
 		Img_channel:          imgChannel,
 		Prefix_image:         "image_",
 	}
 
+	// Launch goroutine for URL processing
+	go func() {
+		webUrlsChannel <- webUrl
+	}()
+
 	for i := 0; i < paginationConfig.GetNumber(); i++ {
-		im := image.Process(iprocessor, url)
 
-		imageUrls = append(imageUrls, im.GetUrl())
+		go func() {
+			im := image.Process(iprocessor, <-webUrlsChannel)
 
-		if paginationConfig.GetNumber() > 1 {
-			url = im.GetNextUrl()
-		}
-	}
+			imageUrlsChannel <- im.GetUrl()
 
-	for _, iu := range imageUrls {
-		go imagedownloader.Download(id, iu)
+			if paginationConfig.GetNumber() > 1 {
+				webUrlsChannel <- im.GetNextUrl()
+			}
+		}()
+		go imagedownloader.Download(id, <-imageUrlsChannel)
 	}
 
 	for i := 0; i < paginationConfig.GetNumber(); i++ {
