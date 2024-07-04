@@ -9,11 +9,11 @@ import (
 )
 
 func ShowTagOptions(s string) {
-	showOptions(tag.TAGS_OPTIONS, fmt.Sprintf("Choose a tag %s", s))
+	showOptions(tag.TAGS_OPTIONS, fmt.Sprintf("\nChoose a tag %s", s))
 }
 
 func ShowSelectorOptions(s string) {
-	showOptions(selector.SELECTOR_TYPE_OPTIONS, fmt.Sprintf("Choose a selector %s", s))
+	showOptions(selector.SELECTOR_TYPE_OPTIONS, fmt.Sprintf("\nChoose a selector %s", s))
 }
 
 func convertToStringSlice(v interface{}) []string {
