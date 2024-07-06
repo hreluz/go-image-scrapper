@@ -140,3 +140,23 @@ func GetPagination() *pagination.Pagination {
 
 	return pagination.New(nil, 1)
 }
+
+func GetTitle() *tag.TagConfig {
+	resp := GetUserInputWithErrorHandling("Does this image have a title (Y/N)?")
+
+	if resp == "Y" {
+		return GetTagConfig("Insert how many levels the title will have, and where to get the text: ")
+	}
+
+	return nil
+}
+
+func GetDescription() *tag.TagConfig {
+	resp := GetUserInputWithErrorHandling("Does this image have a description (Y/N)?")
+
+	if resp == "Y" {
+		return GetTagConfig("Insert how many levels the description will have, and where to get the text: ")
+	}
+
+	return nil
+}

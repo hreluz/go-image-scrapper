@@ -16,20 +16,26 @@ type Images []Image
 type ImageProcessor struct {
 	ic *tag.TagConfig
 	pc *pagination.Pagination
+	tc *tag.TagConfig
+	dc *tag.TagConfig
 }
 
 type Image struct {
-	HTMLParsed soup.Root
-	url        string
-	webUrl     string
-	processed  bool
-	nextUrl    string
+	HTMLParsed  soup.Root
+	url         string
+	webUrl      string
+	processed   bool
+	nextUrl     string
+	title       string
+	description string
 }
 
-func NewProcessor(ic *tag.TagConfig, pc *pagination.Pagination) *ImageProcessor {
+func NewProcessor(ic *tag.TagConfig, pc *pagination.Pagination, tc *tag.TagConfig, dc *tag.TagConfig) *ImageProcessor {
 	return &ImageProcessor{
 		ic: ic,
 		pc: pc,
+		tc: tc,
+		dc: dc,
 	}
 }
 
@@ -43,6 +49,15 @@ func (i *Image) GetNextUrl() string {
 
 func (i *Image) GetWebUrl() string {
 	return i.webUrl
+}
+
+func processText(t *tag.TagConfig, html soup.Root) string {
+	text, err := t.GetLastTagContainer(html)
+
+	if err != nil {
+		log.Fatalf("Error trying to get text tag, error: %v", err)
+	}
+	return text.Text()
 }
 
 func Process(ip *ImageProcessor, webUrl string) *Image {
@@ -64,6 +79,14 @@ func Process(ip *ImageProcessor, webUrl string) *Image {
 	}
 
 	i.url = imageTag.Attrs()["src"]
+
+	if ip.tc != nil {
+		i.title = processText(ip.tc, htmlParsed)
+	}
+
+	if ip.dc != nil {
+		i.description = processText(ip.dc, htmlParsed)
+	}
 
 	fmt.Println("Image link added :", i.url)
 
