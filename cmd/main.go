@@ -16,9 +16,11 @@ func main() {
 	webUrl := interaction.GetUserInputWithErrorHandling("Insert URL")
 	paginationConfig := interaction.GetPagination()
 	imageConfig := interaction.GetTagConfig("Insert how many levels the img will have")
+	titleConfig := interaction.GetTitle()
+	descriptionConfig := interaction.GetDescription()
 
 	// Initialize the image processor and downloader
-	iprocessor := image.NewProcessor(imageConfig, paginationConfig)
+	iprocessor := image.NewProcessor(imageConfig, paginationConfig, titleConfig, descriptionConfig)
 	id := &imagedownloader.ImageDownloader{
 		Download_folder_path: "../downloaded_images",
 		Img_channel:          imgChannel,

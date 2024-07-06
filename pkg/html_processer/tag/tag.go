@@ -18,9 +18,10 @@ const (
 	P       TagName = "p"
 	IMG     TagName = "img"
 	NAV     TagName = "nav"
+	H1      TagName = "h1"
 )
 
-var TAGS_OPTIONS = TagNames{DIV, ARTICLE, SPAN, P, A, IMG, NAV}
+var TAGS_OPTIONS = TagNames{DIV, ARTICLE, SPAN, P, A, IMG, NAV, H1}
 
 type Tag struct {
 	selector *selector.Selector
