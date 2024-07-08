@@ -38,7 +38,7 @@ func main() {
 	for i := 0; i < paginationConfig.GetNumber(); i++ {
 
 		go func() {
-			im := image.Process(iprocessor, <-webUrlsChannel)
+			im := image.NewImage(iprocessor, <-webUrlsChannel)
 
 			images = append(images, im)
 

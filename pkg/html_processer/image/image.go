@@ -38,5 +38,5 @@ func (i *Image) String() string {
 	title := fmt.Sprintf("Title: %s\n", i.title)
 	description := fmt.Sprintf("Description: %s\n", i.description)
 
-	return fmt.Sprintf("\n%s %s %s %s %s %s", multiLine, webUrl, imageUrl, title, description, multiLine)
+	return fmt.Sprintf("\n%s%s%s%s%s%s", multiLine, webUrl, imageUrl, title, description, multiLine)
 }

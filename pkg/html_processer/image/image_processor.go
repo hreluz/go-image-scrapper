@@ -35,7 +35,11 @@ func processText(t *tag.TagConfig, html soup.Root) string {
 	return text.Text()
 }
 
-func Process(ip *ImageProcessor, webUrl string) *Image {
+func NewImage(ip *ImageProcessor, webUrl string) *Image {
+
+	if ip == nil {
+		log.Fatalf("Image processor cannot be nil")
+	}
 
 	var i Image
 
