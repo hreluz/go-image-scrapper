@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/hreluz/images-scrapper/internal/interaction"
 	"github.com/hreluz/images-scrapper/pkg/html_processer/image"
 	imagedownloader "github.com/hreluz/images-scrapper/pkg/image_downloader"
@@ -11,6 +13,7 @@ func main() {
 	imageUrlsChannel := make(chan string)
 	webUrlsChannel := make(chan string)
 	imgChannel := make(chan bool)
+	var images image.Images
 
 	// Get user input and configuration
 	webUrl := interaction.GetUserInputWithErrorHandling("Insert URL")
@@ -37,6 +40,8 @@ func main() {
 		go func() {
 			im := image.Process(iprocessor, <-webUrlsChannel)
 
+			images = append(images, im)
+
 			imageUrlsChannel <- im.GetUrl()
 
 			if paginationConfig.GetNumber() > 1 {
@@ -48,5 +53,9 @@ func main() {
 
 	for i := 0; i < paginationConfig.GetNumber(); i++ {
 		<-imgChannel
+	}
+
+	for _, i := range images {
+		fmt.Println(i)
 	}
 }

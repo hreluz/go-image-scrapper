@@ -25,7 +25,7 @@ func TestGetImageLink(t *testing.T) {
 	tag2 := tag.New(selector.Empty(), tag.IMG)
 	tagConfig := tag.NewConfig(5, []tag.Tag{*tag1, *tag2})
 
-	ip := NewProcessor(tagConfig, nil)
+	ip := NewProcessor(tagConfig, nil, nil, nil)
 	i := Process(ip, url)
 
 	expected := `http://link.com/image.jpeg`
