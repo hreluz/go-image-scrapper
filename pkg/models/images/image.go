@@ -1,4 +1,4 @@
-package image
+package images
 
 import (
 	"fmt"
@@ -6,17 +6,33 @@ import (
 	"github.com/anaskhan96/soup"
 )
 
-type ImageUrls []string
-type Images []*Image
+// htm,  soup.Root
 
 type Image struct {
-	HTMLParsed  soup.Root
+	html        string
 	url         string
 	webUrl      string
-	processed   bool
 	nextUrl     string
 	title       string
 	description string
+}
+
+type ImageUrls []string
+type Images []Image
+
+func New(html, url, webUrl, nextUrl, title, description string) *Image {
+	return &Image{
+		html,
+		url,
+		webUrl,
+		nextUrl,
+		title,
+		description,
+	}
+}
+
+func (i *Image) GetHtmlSoup() soup.Root {
+	return soup.HTMLParse(i.html)
 }
 
 func (i *Image) GetUrl() string {

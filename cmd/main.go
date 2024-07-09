@@ -4,8 +4,9 @@ import (
 	"fmt"
 
 	"github.com/hreluz/images-scrapper/internal/interaction"
-	"github.com/hreluz/images-scrapper/pkg/html_processer/image"
 	imagedownloader "github.com/hreluz/images-scrapper/pkg/image_downloader"
+	"github.com/hreluz/images-scrapper/pkg/models/images"
+	"github.com/hreluz/images-scrapper/pkg/services"
 )
 
 func main() {
@@ -13,7 +14,7 @@ func main() {
 	imageUrlsChannel := make(chan string)
 	webUrlsChannel := make(chan string)
 	imgChannel := make(chan bool)
-	var images image.Images
+	var imagesCollection images.Images
 
 	// Get user input and configuration
 	webUrl := interaction.GetUserInputWithErrorHandling("Insert URL")
@@ -23,7 +24,9 @@ func main() {
 	descriptionConfig := interaction.GetDescription()
 
 	// Initialize the image processor and downloader
-	iprocessor := image.NewProcessor(imageConfig, paginationConfig, titleConfig, descriptionConfig)
+	iprocessor := images.NewProcessor(imageConfig, paginationConfig, titleConfig, descriptionConfig)
+	iservice := services.NewImageService(iprocessor)
+
 	id := &imagedownloader.ImageDownloader{
 		Download_folder_path: "../downloaded_images",
 		Img_channel:          imgChannel,
@@ -38,9 +41,9 @@ func main() {
 	for i := 0; i < paginationConfig.GetNumber(); i++ {
 
 		go func() {
-			im := image.NewImage(iprocessor, <-webUrlsChannel)
+			im := services.ProcessImage(iservice(<-webUrlsChannel))
 
-			images = append(images, im)
+			imagesCollection = append(imagesCollection, *im)
 
 			imageUrlsChannel <- im.GetUrl()
 
@@ -55,7 +58,7 @@ func main() {
 		<-imgChannel
 	}
 
-	for _, i := range images {
-		fmt.Println(i)
+	for _, i := range imagesCollection {
+		fmt.Println(i.String())
 	}
 }
