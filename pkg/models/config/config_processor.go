@@ -1,9 +1,9 @@
-package images
+package config
 
 import (
 	"log"
+	"time"
 
-	"github.com/anaskhan96/soup"
 	"github.com/hreluz/images-scrapper/pkg/html_processer/pagination"
 	"github.com/hreluz/images-scrapper/pkg/html_processer/tag"
 )
@@ -17,15 +17,17 @@ const (
 	TAG_CONFIG_PAGINATION  tagConfigType = "pagination"
 )
 
-type ImageProcessor struct {
+type ConfigProcessor struct {
+	id int64
 	ic *tag.TagConfig
 	pc *pagination.Pagination
 	tc *tag.TagConfig
 	dc *tag.TagConfig
 }
 
-func NewProcessor(ic *tag.TagConfig, pc *pagination.Pagination, tc *tag.TagConfig, dc *tag.TagConfig) *ImageProcessor {
-	return &ImageProcessor{
+func NewProcessor(ic *tag.TagConfig, pc *pagination.Pagination, tc *tag.TagConfig, dc *tag.TagConfig) *ConfigProcessor {
+	return &ConfigProcessor{
+		id: time.Now().Unix(),
 		ic: ic,
 		pc: pc,
 		tc: tc,
@@ -33,7 +35,7 @@ func NewProcessor(ic *tag.TagConfig, pc *pagination.Pagination, tc *tag.TagConfi
 	}
 }
 
-func (ip *ImageProcessor) GetConfig(c tagConfigType) *tag.TagConfig {
+func (ip *ConfigProcessor) GetConfig(c tagConfigType) *tag.TagConfig {
 	switch c {
 	case TAG_CONFIG_IMAGE:
 		return ip.ic
@@ -48,16 +50,6 @@ func (ip *ImageProcessor) GetConfig(c tagConfigType) *tag.TagConfig {
 	return nil
 }
 
-func (ip *ImageProcessor) GetPagination() *pagination.Pagination {
-	return ip.pc
-}
-
-func ProcessText(t *tag.TagConfig, html soup.Root) string {
-	text, err := t.GetLastTagContainer(html)
-
-	if err != nil {
-		log.Fatalf("Error trying to get text tag for processing text, error: %v", err)
-	}
-
-	return text.Text()
+func (cp *ConfigProcessor) GetPagination() *pagination.Pagination {
+	return cp.pc
 }

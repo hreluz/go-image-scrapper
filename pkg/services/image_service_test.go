@@ -7,7 +7,7 @@ import (
 
 	"github.com/hreluz/images-scrapper/pkg/html_processer/selector"
 	"github.com/hreluz/images-scrapper/pkg/html_processer/tag"
-	"github.com/hreluz/images-scrapper/pkg/models/images"
+	"github.com/hreluz/images-scrapper/pkg/models/config"
 )
 
 func TestGetImageLink(t *testing.T) {
@@ -26,7 +26,7 @@ func TestGetImageLink(t *testing.T) {
 	tag2 := tag.New(selector.Empty(), tag.IMG)
 	tagConfig := tag.NewConfig(5, []tag.Tag{*tag1, *tag2})
 
-	ip := images.NewProcessor(tagConfig, nil, nil, nil)
+	ip := config.NewProcessor(tagConfig, nil, nil, nil)
 	i := ProcessImage(NewImageService(ip)(url))
 
 	expected := `http://link.com/image.jpeg`

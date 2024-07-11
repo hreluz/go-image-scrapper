@@ -2,6 +2,7 @@ package tag
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/anaskhan96/soup"
 	"github.com/hreluz/images-scrapper/pkg/html_processer/selector"
@@ -31,11 +32,11 @@ func NewConfig(levels int, tags []Tag) *TagConfig {
 	}
 }
 
-func (tc *TagConfig) GetLastTagContainer(container soup.Root) (soup.Root, error) {
+func (tc *TagConfig) GetLastTagContainer(html soup.Root) (soup.Root, error) {
 	var err error
 
 	for _, tag := range tc.GetTags() {
-		container, err = tag.GetContentByTag(container)
+		html, err = tag.GetContentByTag(html)
 
 		if err != nil {
 			if tag.GetSelector().GetType() == selector.NONE {
@@ -51,5 +52,15 @@ func (tc *TagConfig) GetLastTagContainer(container soup.Root) (soup.Root, error)
 		}
 	}
 
-	return container, nil
+	return html, nil
+}
+
+func (tc *TagConfig) ProcessText(html soup.Root) string {
+	text, err := tc.GetLastTagContainer(html)
+
+	if err != nil {
+		log.Fatalf("Error trying to get text tag for processing text, error: %v", err)
+	}
+
+	return text.Text()
 }
