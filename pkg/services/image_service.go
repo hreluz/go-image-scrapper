@@ -5,17 +5,18 @@ import (
 	"log"
 
 	"github.com/hreluz/images-scrapper/pkg/html_processer/loader"
+	"github.com/hreluz/images-scrapper/pkg/models/config"
 	"github.com/hreluz/images-scrapper/pkg/models/images"
 )
 
 type ImageService struct {
-	ip     *images.ImageProcessor
+	ip     *config.ConfigProcessor
 	webUrl string
 }
 
-func NewImageService(ip *images.ImageProcessor) func(s string) *ImageService {
+func NewImageService(cp *config.ConfigProcessor) func(s string) *ImageService {
 	return func(webUrl string) *ImageService {
-		return &ImageService{ip, webUrl}
+		return &ImageService{cp, webUrl}
 	}
 }
 
@@ -31,7 +32,7 @@ func ProcessImage(is *ImageService) *images.Image {
 		log.Printf("Error parsing HTML: %s", err)
 	}
 
-	imageTag, err := is.ip.GetConfig(images.TAG_CONFIG_IMAGE).GetLastTagContainer(htmlParsed)
+	imageTag, err := is.ip.GetConfig(config.TAG_CONFIG_IMAGE).GetLastTagContainer(htmlParsed)
 
 	if err != nil {
 		log.Fatalf("Error trying to get image tag on fill image func, error: %v", err)
@@ -42,12 +43,14 @@ func ProcessImage(is *ImageService) *images.Image {
 	title := ""
 	description := ""
 
-	if is.ip.GetConfig(images.TAG_CONFIG_TITLE) != nil {
-		title = images.ProcessText(is.ip.GetConfig(images.TAG_CONFIG_TITLE), htmlParsed)
+	if is.ip.GetConfig(config.TAG_CONFIG_TITLE) != nil {
+		tagConfigTitle := is.ip.GetConfig(config.TAG_CONFIG_TITLE)
+		title = tagConfigTitle.ProcessText(htmlParsed)
 	}
 
-	if is.ip.GetConfig(images.TAG_CONFIG_DESCRIPTION) != nil {
-		description = images.ProcessText(is.ip.GetConfig(images.TAG_CONFIG_DESCRIPTION), htmlParsed)
+	if is.ip.GetConfig(config.TAG_CONFIG_DESCRIPTION) != nil {
+		tagConfigDescription := is.ip.GetConfig(config.TAG_CONFIG_DESCRIPTION)
+		description = tagConfigDescription.ProcessText(htmlParsed)
 	}
 
 	fmt.Println("Image link added :", imageUrl)

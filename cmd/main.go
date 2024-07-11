@@ -5,6 +5,7 @@ import (
 
 	"github.com/hreluz/images-scrapper/internal/interaction"
 	imagedownloader "github.com/hreluz/images-scrapper/pkg/image_downloader"
+	"github.com/hreluz/images-scrapper/pkg/models/config"
 	"github.com/hreluz/images-scrapper/pkg/models/images"
 	"github.com/hreluz/images-scrapper/pkg/services"
 )
@@ -24,7 +25,7 @@ func main() {
 	descriptionConfig := interaction.GetDescription()
 
 	// Initialize the image processor and downloader
-	iprocessor := images.NewProcessor(imageConfig, paginationConfig, titleConfig, descriptionConfig)
+	iprocessor := config.NewProcessor(imageConfig, paginationConfig, titleConfig, descriptionConfig)
 	iservice := services.NewImageService(iprocessor)
 
 	id := &imagedownloader.ImageDownloader{
