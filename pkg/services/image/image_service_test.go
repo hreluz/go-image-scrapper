@@ -1,4 +1,4 @@
-package services
+package serviceimage
 
 import (
 	"net/http"
@@ -24,9 +24,9 @@ func TestGetImageLink(t *testing.T) {
 
 	tag1 := tag.New(selector.Empty(), tag.P)
 	tag2 := tag.New(selector.Empty(), tag.IMG)
-	tagConfig := tag.NewConfig(5, []tag.Tag{*tag1, *tag2})
+	tagConfig := tag.NewConfig(5, []*tag.Tag{tag1, tag2})
 
-	ip := config.NewProcessor(tagConfig, nil, nil, nil)
+	ip := config.NewProcessor("", tagConfig, nil, nil, nil)
 	i := ProcessImage(NewImageService(ip)(url))
 
 	expected := `http://link.com/image.jpeg`

@@ -2,8 +2,8 @@ package config
 
 import (
 	"log"
-	"time"
 
+	"github.com/hreluz/images-scrapper/pkg/helpers"
 	"github.com/hreluz/images-scrapper/pkg/html_processer/pagination"
 	"github.com/hreluz/images-scrapper/pkg/html_processer/tag"
 )
@@ -18,20 +18,56 @@ const (
 )
 
 type ConfigProcessor struct {
-	id int64
-	ic *tag.TagConfig
-	pc *pagination.Pagination
-	tc *tag.TagConfig
-	dc *tag.TagConfig
+	id   int
+	name string
+	ic   *tag.TagConfig
+	pc   *pagination.Pagination
+	tc   *tag.TagConfig
+	dc   *tag.TagConfig
 }
 
-func NewProcessor(ic *tag.TagConfig, pc *pagination.Pagination, tc *tag.TagConfig, dc *tag.TagConfig) *ConfigProcessor {
+type ConfigProcessorWrapper struct {
+	ID                  int    `json:"id"`
+	Name                string `json:"name"`
+	ImageConfigID       int    `json:"image_config_id"`
+	PaginationID        int    `json:"pagination_id"`
+	TitleConfigID       int    `json:"title_config_id"`
+	DescriptionConfigID int    `json:"description_config_id"`
+}
+
+func (cp *ConfigProcessor) GetWrapper() *ConfigProcessorWrapper {
+	return &ConfigProcessorWrapper{
+		ID:                  cp.id,
+		Name:                cp.name,
+		ImageConfigID:       cp.GetConfig(TAG_CONFIG_IMAGE).GetID(),
+		PaginationID:        cp.pc.GetID(),
+		TitleConfigID:       cp.GetConfig(TAG_CONFIG_TITLE).GetID(),
+		DescriptionConfigID: cp.GetConfig(TAG_CONFIG_DESCRIPTION).GetID(),
+	}
+}
+
+func (cp *ConfigProcessor) GetID() int {
+	return cp.id
+}
+
+func (cp *ConfigProcessor) GetName() string {
+	return cp.name
+}
+
+func LoadWrapper(cp *ConfigProcessorWrapper, tagConfigs []*tag.TagConfig) *ConfigProcessor {
+	new := NewProcessor(cp.Name, tagConfigs[0], nil, tagConfigs[1], tagConfigs[2])
+	new.id = cp.ID
+	return new
+}
+
+func NewProcessor(name string, ic *tag.TagConfig, pc *pagination.Pagination, tc *tag.TagConfig, dc *tag.TagConfig) *ConfigProcessor {
 	return &ConfigProcessor{
-		id: time.Now().Unix(),
-		ic: ic,
-		pc: pc,
-		tc: tc,
-		dc: dc,
+		id:   helpers.GetRandomNumber(),
+		name: name,
+		ic:   ic,
+		pc:   pc,
+		tc:   tc,
+		dc:   dc,
 	}
 }
 

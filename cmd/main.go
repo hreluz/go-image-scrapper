@@ -7,7 +7,7 @@ import (
 	imagedownloader "github.com/hreluz/images-scrapper/pkg/image_downloader"
 	"github.com/hreluz/images-scrapper/pkg/models/config"
 	"github.com/hreluz/images-scrapper/pkg/models/images"
-	"github.com/hreluz/images-scrapper/pkg/services"
+	serviceimage "github.com/hreluz/images-scrapper/pkg/services/image"
 )
 
 func main() {
@@ -25,8 +25,8 @@ func main() {
 	descriptionConfig := interaction.GetDescription()
 
 	// Initialize the image processor and downloader
-	iprocessor := config.NewProcessor(imageConfig, paginationConfig, titleConfig, descriptionConfig)
-	iservice := services.NewImageService(iprocessor)
+	iprocessor := config.NewProcessor("", imageConfig, paginationConfig, titleConfig, descriptionConfig)
+	iservice := serviceimage.NewImageService(iprocessor)
 
 	id := &imagedownloader.ImageDownloader{
 		Download_folder_path: "../downloaded_images",
@@ -42,7 +42,7 @@ func main() {
 	for i := 0; i < paginationConfig.GetNumber(); i++ {
 
 		go func() {
-			im := services.ProcessImage(iservice(<-webUrlsChannel))
+			im := serviceimage.ProcessImage(iservice(<-webUrlsChannel))
 
 			imagesCollection = append(imagesCollection, *im)
 

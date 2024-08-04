@@ -21,7 +21,7 @@ func TestGetPaginationNextLink(t *testing.T) {
 	tag6 := tag.New(selector.Empty(), tag.SPAN)
 	tag7 := tag.New(selector.Empty(), tag.A)
 
-	tagConfig := tag.NewConfig(7, []tag.Tag{*tag1, *tag2, *tag3, *tag4, *tag5, *tag6, *tag7})
+	tagConfig := tag.NewConfig(7, []*tag.Tag{tag1, tag2, tag3, tag4, tag5, tag6, tag7})
 
 	pagination := New(tagConfig, 1)
 
@@ -45,7 +45,7 @@ func TestGetPaginationNextLink_was_not_found(t *testing.T) {
 	tag1 := tag.New(selector.New(selector.ID, "invented-id"), tag.DIV)
 	tag2 := tag.New(selector.Empty(), tag.A)
 
-	tagConfig := tag.NewConfig(2, []tag.Tag{*tag1, *tag2})
+	tagConfig := tag.NewConfig(2, []*tag.Tag{tag1, tag2})
 
 	pagination := New(tagConfig, 1)
 

@@ -102,7 +102,7 @@ func GetTagData(tagOptionText string, selectorTypeText string) *tag.Tag {
 func GetTagConfig(s string) *tag.TagConfig {
 	input := GetUserInputWithErrorHandling(s)
 	levels, _ := strconv.Atoi(input)
-	tc := tag.NewConfig(levels, []tag.Tag{})
+	tc := tag.NewConfig(levels, []*tag.Tag{})
 
 	for i := 0; i < levels; i++ {
 		fmt.Println()
