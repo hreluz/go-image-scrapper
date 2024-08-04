@@ -2,20 +2,37 @@ package pagination
 
 import (
 	"github.com/anaskhan96/soup"
+	"github.com/hreluz/images-scrapper/pkg/helpers"
 	tag "github.com/hreluz/images-scrapper/pkg/html_processer/tag"
 )
 
 type Pagination struct {
+	id     int
 	tc     *tag.TagConfig
 	number int
 }
 
-// New returns a new Selector
+type PaginationWrapper struct {
+	ID                 int                   `json:"id"`
+	PaginationConfigID *tag.TagConfigWrapper `json:"pagination_config_id"`
+	Number             int                   `json:"number"`
+}
+
 func New(tc *tag.TagConfig, number int) *Pagination {
 	return &Pagination{
-		tc,
-		number,
+		id:     helpers.GetRandomNumber(),
+		tc:     tc,
+		number: number,
 	}
+}
+
+func (p *Pagination) GetID() int {
+
+	if p == nil {
+		return 0
+	}
+
+	return p.id
 }
 
 func (p *Pagination) GetNumber() int {

@@ -17,6 +17,18 @@ type Selector struct {
 	name  SelectorName
 }
 
+type SelectorWrapper struct {
+	SType SelectorType `json:"stype"`
+	Name  SelectorName `json:"name"`
+}
+
+func (s *Selector) GetWrapper() *SelectorWrapper {
+	return &SelectorWrapper{
+		s.stype,
+		s.name,
+	}
+}
+
 // New returns a new Selector
 func New(stype SelectorType, name string) *Selector {
 	return &Selector{

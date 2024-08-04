@@ -17,7 +17,7 @@ func TestGetLastTagContainer(t *testing.T) {
 	tag3 := New(selector.New(selector.ID, "third"), ARTICLE)
 	tag4 := New(selector.New(selector.CLASS, "fourth-div"), DIV)
 	tag5 := New(selector.New(selector.CLASS, "last-tag"), DIV)
-	tagConfig := NewConfig(5, []Tag{*tag1, *tag2, *tag3, *tag4, *tag5})
+	tagConfig := NewConfig(5, []*Tag{tag1, tag2, tag3, tag4, tag5})
 
 	selector, _ := tagConfig.GetLastTagContainer(htmlParsed)
 	got := string(selector.HTML())

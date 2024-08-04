@@ -5,30 +5,65 @@ import (
 	"log"
 
 	"github.com/anaskhan96/soup"
+	"github.com/hreluz/images-scrapper/pkg/helpers"
 	"github.com/hreluz/images-scrapper/pkg/html_processer/selector"
 )
 
 type TagConfig struct {
+	id     int
 	levels int
-	tags   []Tag
+	tags   []*Tag
+}
+
+type TagConfigWrapper struct {
+	ID     int    `json:"id"`
+	Levels int    `json:"levels"`
+	TagIds []*int `json:"tagIds"`
+}
+
+func (tc *TagConfig) GetWrapper() *TagConfigWrapper {
+	var tagIds []*int
+
+	for i := 0; i < len(tc.tags); i++ {
+		tagIds = append(tagIds, &tc.tags[i].id)
+	}
+
+	return &TagConfigWrapper{
+		tc.id,
+		tc.levels,
+		tagIds,
+	}
+}
+
+func LoadTagConfigWrapper(tw *TagConfigWrapper, tags []*Tag) *TagConfig {
+	return &TagConfig{
+		tw.ID,
+		tw.Levels,
+		tags,
+	}
+}
+
+func (tc *TagConfig) GetID() int {
+	return tc.id
 }
 
 func (tc *TagConfig) GetLevels() int {
 	return tc.levels
 }
 
-func (tc *TagConfig) GetTags() []Tag {
+func (tc *TagConfig) GetTags() []*Tag {
 	return tc.tags
 }
 
 func (tc *TagConfig) AddTag(tag *Tag) {
-	tc.tags = append(tc.tags, *tag)
+	tc.tags = append(tc.tags, tag)
 }
 
-func NewConfig(levels int, tags []Tag) *TagConfig {
+func NewConfig(levels int, tags []*Tag) *TagConfig {
 	return &TagConfig{
-		levels,
-		tags,
+		id:     helpers.GetRandomNumber(),
+		levels: levels,
+		tags:   tags,
 	}
 }
 

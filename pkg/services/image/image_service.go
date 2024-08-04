@@ -1,4 +1,4 @@
-package services
+package serviceimage
 
 import (
 	"fmt"

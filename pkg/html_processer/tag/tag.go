@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/anaskhan96/soup"
+	"github.com/hreluz/images-scrapper/pkg/helpers"
 	selector "github.com/hreluz/images-scrapper/pkg/html_processer/selector"
 )
 
@@ -24,16 +25,43 @@ const (
 var TAGS_OPTIONS = TagNames{DIV, ARTICLE, SPAN, P, A, IMG, NAV, H1}
 
 type Tag struct {
+	id       int
 	selector *selector.Selector
 	name     TagName
+}
+
+type TagWrapper struct {
+	ID       int                      `json:"id"`
+	Name     TagName                  `json:"string"`
+	Selector selector.SelectorWrapper `json:"selector"`
 }
 
 // New returns a new Tag
 func New(selector *selector.Selector, name TagName) *Tag {
 	return &Tag{
+		helpers.GetRandomNumber(),
 		selector,
 		name,
 	}
+}
+
+func (t *Tag) GetWrapper() *TagWrapper {
+	return &TagWrapper{
+		ID:       t.id,
+		Name:     t.name,
+		Selector: *t.selector.GetWrapper(),
+	}
+}
+
+func LoadWrapper(tw *TagWrapper) *Tag {
+	selector := selector.New(
+		tw.Selector.SType,
+		string(tw.Selector.Name),
+	)
+
+	tag := New(selector, tw.Name)
+	tag.id = tw.ID
+	return tag
 }
 
 func (t *Tag) GetSelector() *selector.Selector {
@@ -42,6 +70,10 @@ func (t *Tag) GetSelector() *selector.Selector {
 
 func (t *Tag) GetName() TagName {
 	return t.name
+}
+
+func (t *Tag) GetID() int {
+	return t.id
 }
 
 func (t *Tag) GetContentByTag(doc soup.Root) (soup.Root, error) {
